@@ -203,6 +203,13 @@
         let comboTimer = null;
         let lastKillTime = 0;
 
+        const CLICK_COOLDOWN = 220;
+        let lastClickTime = 0;
+        let rapidClicks = 0;
+        const MAX_RAPID = 5;
+        const RAPID_WINDOW = 3000;
+        let rapidWindowStart = 0;
+
         const chickenImg = document.createElement('img');
         chickenImg.className = 'chicken';
         chickenImg.src = 'https://raw.githubusercontent.com/FChickCG/ChickenGunTGBot.github.io/main/Textures/ChickenEnemy.png';
@@ -244,50 +251,66 @@
             document.body.appendChild(c);
         }
 
-function onChickenClick(e) {
-    e.preventDefault();
-    e.stopPropagation();
+        function onChickenClick(e) {
+            e.preventDefault();
+            e.stopPropagation();
 
-    const target = e.currentTarget || e.target.closest('.chicken');
-    if (!target || target.classList.contains('hit')) return;
+            const target = e.currentTarget || e.target.closest('.chicken');
+            if (!target || target.classList.contains('hit')) return;
 
-    target.classList.add('hit');
+            const now = Date.now();
+            if (now - lastClickTime < CLICK_COOLDOWN) {
+                return;
+            }
+            lastClickTime = now;
 
-    totalKills++;
-    pendingKills++;
+            if (now - rapidWindowStart > RAPID_WINDOW) {
+                rapidClicks = 0;
+                rapidWindowStart = now;
+            }
+            rapidClicks++;
+            if (rapidClicks > MAX_RAPID) {
+                pendingKills = Math.max(0, pendingKills - 1);
+                return;
+            }
 
-    const now = Date.now();
-    if (now - lastKillTime < 2000) {
-        combo++;
-    } else {
-        combo = 1;
-    }
-    lastKillTime = now;
+            target.classList.add('hit');
 
-    clearTimeout(comboTimer);
-    comboTimer = setTimeout(() => {
-        combo = 0;
-        document.getElementById('combo').textContent = '';
-        document.getElementById('combo').classList.remove('visible');
-    }, 2000);
+            totalKills++;
+            pendingKills++;
 
-    if (combo > 1) {
-        const comboEl = document.getElementById('combo');
-        comboEl.textContent = 'x' + combo + ' COMBO!';
-        comboEl.classList.add('visible');
-    }
+            const now = Date.now();
+            if (now - lastKillTime < 2000) {
+                combo++;
+            } else {
+                combo = 1;
+            }
+            lastKillTime = now;
 
-    const isPremium = tg.initDataUnsafe?.user?.is_premium || false;
-    const coins = isPremium ? 20 : 10;
+            clearTimeout(comboTimer);
+            comboTimer = setTimeout(() => {
+                combo = 0;
+                document.getElementById('combo').textContent = '';
+                document.getElementById('combo').classList.remove('visible');
+            }, 2000);
 
-    showFloatingScore(target, '+' + coins);
-    document.getElementById('kills').textContent = 'Киллы: ' + totalKills;
+            if (combo > 1) {
+                const comboEl = document.getElementById('combo');
+                comboEl.textContent = 'x' + combo + ' COMBO!';
+                comboEl.classList.add('visible');
+            }
 
-    setTimeout(() => {
-        target.remove();
-        spawnChicken();
-    }, 350);
-}
+            const isPremium = tg.initDataUnsafe?.user?.is_premium || false;
+            const coins = isPremium ? 5 : 3;
+
+            showFloatingScore(target, '+' + coins);
+            document.getElementById('kills').textContent = 'Киллы: ' + totalKills;
+
+            setTimeout(() => {
+                target.remove();
+                spawnChicken();
+            }, 300 + Math.random() * 200);
+        }
 
         function showFloatingScore(element, text) {
             const rect = element.getBoundingClientRect();
