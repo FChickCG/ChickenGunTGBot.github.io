@@ -244,50 +244,50 @@
             document.body.appendChild(c);
         }
 
-        function onChickenClick(e) {
-            e.preventDefault();
-            e.stopPropagation();
+function onChickenClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
 
-            const target = e.currentTarget || e.target.closest('.chicken');
-            if (!target || target.classList.contains('hit')) return;
+    const target = e.currentTarget || e.target.closest('.chicken');
+    if (!target || target.classList.contains('hit')) return;
 
-            target.classList.add('hit');
+    target.classList.add('hit');
 
-            totalKills++;
-            pendingKills++;
+    totalKills++;
+    pendingKills++;
 
-            const now = Date.now();
-            if (now - lastKillTime < 2000) {
-                combo++;
-            } else {
-                combo = 1;
-            }
-            lastKillTime = now;
+    const now = Date.now();
+    if (now - lastKillTime < 2000) {
+        combo++;
+    } else {
+        combo = 1;
+    }
+    lastKillTime = now;
 
-            clearTimeout(comboTimer);
-            comboTimer = setTimeout(() => {
-                combo = 0;
-                document.getElementById('combo').textContent = '';
-                document.getElementById('combo').classList.remove('visible');
-            }, 2000);
+    clearTimeout(comboTimer);
+    comboTimer = setTimeout(() => {
+        combo = 0;
+        document.getElementById('combo').textContent = '';
+        document.getElementById('combo').classList.remove('visible');
+    }, 2000);
 
-            if (combo > 1) {
-                const comboEl = document.getElementById('combo');
-                comboEl.textContent = 'x' + combo + ' COMBO!';
-                comboEl.classList.add('visible');
-            }
+    if (combo > 1) {
+        const comboEl = document.getElementById('combo');
+        comboEl.textContent = 'x' + combo + ' COMBO!';
+        comboEl.classList.add('visible');
+    }
 
-            const isPremium = tg.initDataUnsafe?.user?.is_premium || false;
-            const coins = isPremium ? 20 : 10;
+    const isPremium = tg.initDataUnsafe?.user?.is_premium || false;
+    const coins = isPremium ? 20 : 10;
 
-            showFloatingScore(target, '+' + coins);
-            document.getElementById('kills').textContent = 'Киллы: ' + totalKills;
+    showFloatingScore(target, '+' + coins);
+    document.getElementById('kills').textContent = 'Киллы: ' + totalKills;
 
-            setTimeout(() => {
-                target.remove();
-                spawnChicken();
-            }, 350);
-        }
+    setTimeout(() => {
+        target.remove();
+        spawnChicken();
+    }, 350);
+}
 
         function showFloatingScore(element, text) {
             const rect = element.getBoundingClientRect();
