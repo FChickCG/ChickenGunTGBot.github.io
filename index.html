@@ -22,7 +22,7 @@
 
         body {
             background-color: #1a1a2e;
-            background-image: url('../Textures/Background1.png');
+            background-image: url('Textures/Background1.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -191,7 +191,7 @@
     <div class="score-popup" id="scorePopup"></div>
     <div class="combo-text" id="comboText"></div>
 
-    <img class="weapon" src="../Textures/Weapon1.png" alt="weapon">
+    <img class="weapon"             src='Textures/Weapon1.png' alt="weapon">
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -205,7 +205,7 @@
 
         const chickenImg = document.createElement('img');
         chickenImg.className = 'chicken';
-        chickenImg.src = '../Textures/ChickenEnemy.png';
+            chickenImg.src = 'Textures/ChickenEnemy.png';
         chickenImg.alt = 'chicken';
 
         function spawnChicken() {
