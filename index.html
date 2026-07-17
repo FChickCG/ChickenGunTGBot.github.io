@@ -22,7 +22,7 @@
 
         body {
             background-color: #1a1a2e;
-            background-image: url('Textures/Background1.png');
+            background-image: url('https://raw.githubusercontent.com/FChickCG/ChickenGunTGBot.github.io/main/Textures/Background1.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -52,7 +52,7 @@
             position: fixed;
             bottom: 10px;
             right: 10px;
-            width: 80px;
+            width: 160px;
             height: auto;
             pointer-events: none;
             z-index: 100;
@@ -93,7 +93,7 @@
 
         .combo-text {
             position: fixed;
-            top: 20px;
+            top: 50px;
             left: 50%;
             transform: translateX(-50%);
             font-size: 28px;
@@ -191,22 +191,32 @@
     <div class="score-popup" id="scorePopup"></div>
     <div class="combo-text" id="comboText"></div>
 
-    <img class="weapon"             src='Textures/Weapon1.png' alt="weapon">
-
+    <img class="weapon" src="https://raw.githubusercontent.com/FChickCG/ChickenGunTGBot.github.io/main/Textures/Weapon1.png" alt="weapon">
     <script>
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
 
         let totalKills = 0;
+        let pendingKills = 0;
         let combo = 0;
         let comboTimer = null;
         let lastKillTime = 0;
 
         const chickenImg = document.createElement('img');
         chickenImg.className = 'chicken';
-            chickenImg.src = 'Textures/ChickenEnemy.png';
+        chickenImg.src = 'https://raw.githubusercontent.com/FChickCG/ChickenGunTGBot.github.io/main/Textures/ChickenEnemy.png';
         chickenImg.alt = 'chicken';
+
+        function sendPendingKills() {
+            if (pendingKills <= 0) return;
+            try {
+                tg.sendData(JSON.stringify({ action: 'kill', count: pendingKills }));
+                pendingKills = 0;
+            } catch (err) {
+                console.error('sendData error:', err);
+            }
+        }
 
         function spawnChicken() {
             const existing = document.querySelector('.chicken');
@@ -244,6 +254,7 @@
             target.classList.add('hit');
 
             totalKills++;
+            pendingKills++;
 
             const now = Date.now();
             if (now - lastKillTime < 2000) {
@@ -272,12 +283,6 @@
             showFloatingScore(target, '+' + coins);
             document.getElementById('kills').textContent = 'Киллы: ' + totalKills;
 
-            try {
-                tg.sendData(JSON.stringify({ action: 'kill' }));
-            } catch (err) {
-                console.error('sendData error:', err);
-            }
-
             setTimeout(() => {
                 target.remove();
                 spawnChicken();
@@ -298,8 +303,15 @@
         }
 
         document.getElementById('btnClose').addEventListener('click', () => {
-            tg.close();
+            sendPendingKills();
+            setTimeout(() => tg.close(), 200);
         });
+
+        window.addEventListener('beforeunload', () => {
+            sendPendingKills();
+        });
+
+        tg.MainButton.setParams({ is_visible: false });
 
         spawnChicken();
     </script>
