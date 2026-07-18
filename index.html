@@ -194,161 +194,162 @@
     <div class="combo-text" id="comboText"></div>
 
     <img class="weapon" src="https://raw.githubusercontent.com/FChickCG/ChickenGunTGBot.github.io/main/Textures/Weapon1.png" alt="weapon">
-const tg = window.Telegram.WebApp;
-tg.ready();
-tg.expand();
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
 
-let totalKills = 0;
-let pendingKills = 0;
-let combo = 0;
-let comboTimer = null;
-let lastKillTime = 0;
+        let totalKills = 0;
+        let pendingKills = 0;
+        let combo = 0;
+        let comboTimer = null;
+        let lastKillTime = 0;
 
-const CLICK_COOLDOWN = 220;
-let lastClickTime = 0;
-let rapidClicks = 0;
-const MAX_RAPID = 5;
-const RAPID_WINDOW = 3000;
-let rapidWindowStart = 0;
+        const CLICK_COOLDOWN = 220;
+        let lastClickTime = 0;
+        let rapidClicks = 0;
+        const MAX_RAPID = 5;
+        const RAPID_WINDOW = 3000;
+        let rapidWindowStart = 0;
 
-const chickenImg = document.createElement('img');
-chickenImg.className = 'chicken';
-chickenImg.src = 'https://raw.githubusercontent.com/FChickCG/ChickenGunTGBot.github.io/main/Textures/ChickenEnemy.png';
-chickenImg.alt = 'chicken';
+        const chickenImg = document.createElement('img');
+        chickenImg.className = 'chicken';
+        chickenImg.src = 'https://raw.githubusercontent.com/FChickCG/ChickenGunTGBot.github.io/main/Textures/ChickenEnemy.png';
+        chickenImg.alt = 'chicken';
 
-function sendPendingKills() {
-    if (pendingKills <= 0) return;
-    try {
-        tg.sendData(JSON.stringify({ action: 'kill', count: pendingKills }));
-        pendingKills = 0;
-    } catch (err) {
-        console.error('sendData error:', err);
-    }
-}
+        function sendPendingKills() {
+            if (pendingKills <= 0) return;
+            try {
+                tg.sendData(JSON.stringify({ action: 'kill', count: pendingKills }));
+                pendingKills = 0;
+            } catch (err) {
+                console.error('sendData error:', err);
+            }
+        }
 
-function spawnChicken() {
-    const existing = document.querySelector('.chicken');
-    if (existing && !existing.classList.contains('hit')) return;
+        function spawnChicken() {
+            const existing = document.querySelector('.chicken');
+            if (existing && !existing.classList.contains('hit')) return;
 
-    const c = chickenImg.cloneNode(true);
-    c.classList.remove('hit', 'spawning');
-    void c.offsetWidth;
-    c.classList.add('spawning');
+            const c = chickenImg.cloneNode(true);
+            c.classList.remove('hit', 'spawning');
+            void c.offsetWidth;
+            c.classList.add('spawning');
 
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const chickenW = Math.min(vw * 0.25, 100);
-    const padTop = 60;
-    const padBottom = 130;
-    const maxX = vw - chickenW - 10;
-    const maxY = vh - padBottom;
-    const x = 10 + Math.random() * (maxX - 10);
-    const y = padTop + Math.random() * (maxY - padTop);
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const chickenW = Math.min(vw * 0.25, 100);
+            const padTop = 60;
+            const padBottom = 130;
+            const maxX = vw - chickenW - 10;
+            const maxY = vh - padBottom;
+            const x = 10 + Math.random() * (maxX - 10);
+            const y = padTop + Math.random() * (maxY - padTop);
 
-    c.style.left = x + 'px';
-    c.style.top = y + 'px';
+            c.style.left = x + 'px';
+            c.style.top = y + 'px';
 
-    c.addEventListener('click', onChickenClick);
-    c.addEventListener('touchstart', function handler(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        onChickenClick(e);
-    }, { passive: false });
+            c.addEventListener('click', onChickenClick);
+            c.addEventListener('touchstart', function handler(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                onChickenClick(e);
+            }, { passive: false });
 
-    document.body.appendChild(c);
-}
+            document.body.appendChild(c);
+        }
 
-function onChickenClick(e) {
-    e.preventDefault();
-    e.stopPropagation();
+        function onChickenClick(e) {
+            e.preventDefault();
+            e.stopPropagation();
 
-    const target = e.currentTarget || e.target.closest('.chicken');
-    if (!target || target.classList.contains('hit')) return;
+            const target = e.currentTarget || e.target.closest('.chicken');
+            if (!target || target.classList.contains('hit')) return;
 
-    const now = Date.now();
-    if (now - lastClickTime < CLICK_COOLDOWN) {
-        return;
-    }
-    lastClickTime = now;
+            const now = Date.now();
+            if (now - lastClickTime < CLICK_COOLDOWN) {
+                return;
+            }
+            lastClickTime = now;
 
-    if (now - rapidWindowStart > RAPID_WINDOW) {
-        rapidClicks = 0;
-        rapidWindowStart = now;
-    }
-    rapidClicks++;
-    if (rapidClicks > MAX_RAPID) {
-        pendingKills = Math.max(0, pendingKills - 1);
-        return;
-    }
+            if (now - rapidWindowStart > RAPID_WINDOW) {
+                rapidClicks = 0;
+                rapidWindowStart = now;
+            }
+            rapidClicks++;
+            if (rapidClicks > MAX_RAPID) {
+                pendingKills = Math.max(0, pendingKills - 1);
+                return;
+            }
 
-    target.classList.add('hit');
+            target.classList.add('hit');
 
-    totalKills++;
-    pendingKills++;
+            totalKills++;
+            pendingKills++;
 
-    if (now - lastKillTime < 2000) {
-        combo++;
-    } else {
-        combo = 1;
-    }
-    lastKillTime = now;
+            if (now - lastKillTime < 2000) {
+                combo++;
+            } else {
+                combo = 1;
+            }
+            lastKillTime = now;
 
-    clearTimeout(comboTimer);
-    comboTimer = setTimeout(() => {
-        combo = 0;
-        document.getElementById('combo').textContent = '';
-        document.getElementById('combo').classList.remove('visible');
-    }, 2000);
+            clearTimeout(comboTimer);
+            comboTimer = setTimeout(() => {
+                combo = 0;
+                document.getElementById('combo').textContent = '';
+                document.getElementById('combo').classList.remove('visible');
+            }, 2000);
 
-    if (combo > 1) {
-        const comboEl = document.getElementById('combo');
-        comboEl.textContent = 'x' + combo + ' COMBO!';
-        comboEl.classList.add('visible');
-    }
+            if (combo > 1) {
+                const comboEl = document.getElementById('combo');
+                comboEl.textContent = 'x' + combo + ' COMBO!';
+                comboEl.classList.add('visible');
+            }
 
-    const isPremium = tg.initDataUnsafe?.user?.is_premium || false;
-    const coins = isPremium ? 5 : 3;
+            const isPremium = tg.initDataUnsafe?.user?.is_premium || false;
+            const coins = isPremium ? 5 : 3;
 
-    showFloatingScore(target, '+' + coins);
-    document.getElementById('kills').textContent = 'Киллы: ' + totalKills;
+            showFloatingScore(target, '+' + coins);
+            document.getElementById('kills').textContent = 'Киллы: ' + totalKills;
 
-    setTimeout(() => {
-        target.remove();
+            setTimeout(() => {
+                target.remove();
+                spawnChicken();
+            }, 300 + Math.random() * 200);
+        }
+
+        function showFloatingScore(element, text) {
+            const rect = element.getBoundingClientRect();
+            const el = document.createElement('div');
+            el.className = 'score-text';
+            el.textContent = text;
+            el.style.left = (rect.left + rect.width / 2 - 20) + 'px';
+            el.style.top = (rect.top - 10) + 'px';
+            document.body.appendChild(el);
+
+            requestAnimationFrame(() => el.classList.add('show'));
+            setTimeout(() => el.remove(), 800);
+        }
+
+        document.getElementById('btnClose').addEventListener('click', () => {
+            sendPendingKills();
+            setTimeout(() => tg.close(), 200);
+        });
+
+        document.getElementById('btnClose').addEventListener('touchend', (e) => {
+            e.preventDefault();
+            sendPendingKills();
+            setTimeout(() => tg.close(), 200);
+        });
+
+        window.addEventListener('beforeunload', () => {
+            sendPendingKills();
+        });
+
+        tg.MainButton.setParams({ is_visible: false });
+
         spawnChicken();
-    }, 300 + Math.random() * 200);
-}
-
-function showFloatingScore(element, text) {
-    const rect = element.getBoundingClientRect();
-    const el = document.createElement('div');
-    el.className = 'score-text';
-    el.textContent = text;
-    el.style.left = (rect.left + rect.width / 2 - 20) + 'px';
-    el.style.top = (rect.top - 10) + 'px';
-    document.body.appendChild(el);
-
-    requestAnimationFrame(() => el.classList.add('show'));
-    setTimeout(() => el.remove(), 800);
-}
-
-document.getElementById('btnClose').addEventListener('click', () => {
-    sendPendingKills();
-    setTimeout(() => tg.close(), 200);
-});
-
-document.getElementById('btnClose').addEventListener('touchend', (e) => {
-    e.preventDefault();
-    sendPendingKills();
-    setTimeout(() => tg.close(), 200);
-});
-
-window.addEventListener('beforeunload', () => {
-    sendPendingKills();
-});
-
-tg.MainButton.setParams({ is_visible: false });
-
-spawnChicken();
     </script>
 </body>
 </html>
